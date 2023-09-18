@@ -1,0 +1,156 @@
+version: "3.7"
+services:
+    python:
+        build:
+            context: ./python
+            dockerfile: Dockerfile
+        image: yt:python
+        container_name: youtubePython
+        networks:
+            tap:
+        environment:
+            PYTHON_APP: streaming-youtube.py
+            LOGSTASH_IP: 10.0.100.30
+            LOGSTASH_PORT: 6000
+            VIDEO_URL: ${VIDEO_URL}
+            API_KEY: ${API_KEY}
+            SEND_OLD_COMMENTS: ${SEND_OLD_COMMENTS}
+        entrypoint: ["./python-manager.sh"]
+        depends_on:
+            - elastic_search
+    zookeeper:
+        build:
+            context: ./kafka
+            dockerfile: Dockerfile
+        image: yt:kafka
+        container_name: kafkaZK
+        networks: 
+            tap:
+                ipv4_address: ${IP_ZOOKEEPER}
+        ports:
+            - ${PORT_ZOOKEEPER}:${PORT_ZOOKEEPER}
+        environment: 
+            KAFKA_ACTION: start-zk
+    
+    kafka_server:
+        build:
+            context: ./kafka
+            dockerfile: Dockerfile
+        image: yt:kafka
+        container_name: kafkaServer
+        networks: 
+            tap:
+                ipv4_address: ${IP_KAFKA_SERVER}
+        ports:
+            - ${PORT_KAFKA_SERVER}:${PORT_KAFKA_SERVER}
+        expose:
+            - 29092
+        environment: 
+            KAFKA_ACTION: start-kafka
+        depends_on: 
+            - zookeeper
+    kafkaui:
+        image: provectuslabs/kafka-ui:latest
+        container_name: kafkaUI
+        environment:
+            - KAFKA_CLUSTERS_0_ZOOKEEPER=${IP_ZOOKEEPER}:${PORT_ZOOKEEPER}
+            - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${IP_KAFKA_SERVER}:${PORT_KAFKA_SERVER}
+        ports: 
+            - ${PORT_WEBUI}:${PORT_WEBUI}
+        networks: 
+            - tap
+        depends_on:
+            - kafka_server
+    kafkainit:
+        build:
+            context: ./kafka
+            dockerfile: Dockerfile
+        image: yt:kafka
+        container_name: kafkaInit
+        networks: 
+            tap:
+        volumes:
+            - ./script.sh:/script.sh
+        entrypoint: ["bash", "/script.sh"]
+        depends_on:
+            - kafka_server
+    logstash:
+        build:
+            context: ./logstash
+            dockerfile: Dockerfile
+        image: yt:logstash
+        container_name: logstash
+        networks:
+            tap:
+                ipv4_address: ${IP_LOGSTASH}
+        volumes:
+            - $PWD/logstash/pipeline/youtube.conf:/usr/share/logstash/pipeline/logstash.conf
+        ports:
+            - ${PORT_LOGSTASH}:${PORT_LOGSTASH}
+        depends_on:
+            - kafka_server
+    elastic_search:
+        build:
+            context: ./elasticsearch
+            dockerfile: Dockerfile
+        image: yt:elasticsearch
+        container_name: elasticsearch
+        networks: 
+            tap:
+                ipv4_address: ${IP_ELASTIC}
+        ports:
+            - ${PORT_ELASTIC_1}:${PORT_ELASTIC_1}
+            - ${PORT_ELASTIC_2}:${PORT_ELASTIC_2}
+        environment:
+            discovery.type: single-node
+            xpack.security.enabled: false
+            ES_JAVA_OPTS: -Xms4g -Xmx4g
+        volumes:
+            - elasticsearch:/usr/share/elasticsearch/data/
+    kibana:
+        build:
+            context: ./kibana
+            dockerfile: Dockerfile
+        image: yt:kibana
+        container_name: kibana
+        networks: 
+            tap:
+                ipv4_address: ${IP_KIBANA}
+        ports:
+            - ${PORT_KIBANA}:${PORT_KIBANA}
+        depends_on:
+            - elastic_search
+    spark:
+        build:
+            context: ./spark
+            dockerfile: Dockerfile
+        image: yt:spark
+        container_name: sparkSubmit
+        networks:
+            tap:
+                ipv4_address: ${IP_SPARK}
+        ports:
+            - ${PORT_SPARK}:${PORT_SPARK}
+        volumes:
+            - sparklibs:/root/.ivy2
+        environment:
+            SPARK_ACTION: "spark-submit-python"
+            SPARK_WAITING_TIME: ${SPARK_WAITING_TIME}
+        command: ["youtube.py", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0,org.elasticsearch:elasticsearch-spark-30_2.12:8.7.1"]
+        depends_on:
+            - kafka_server
+            - logstash
+            - zookeeper
+            - elastic_search
+    
+volumes:
+    sparklibs:
+    elasticsearch:
+
+networks: 
+    tap:
+        name: tap
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.0.100.1/24

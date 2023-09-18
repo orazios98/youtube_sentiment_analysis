@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+docker run --network tap -e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=10.0.100.23:9092 -e KAFKA_CLUSTERS_0_ZOOKEEPER=10.0.100.22:2181 -p 8080:8080 provectuslabs/kafka-ui:latest

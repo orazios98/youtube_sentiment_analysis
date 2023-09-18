@@ -1,0 +1,2 @@
+docker build -t yt:logstash .
+docker run --network tap  --ip 10.0.100.30 -p 6000:6000 --rm -it -v $PWD/pipeline/youtube.conf:/usr/share/logstash/pipeline/logstash.conf docker.elastic.co/logstash/logstash:8.6.2

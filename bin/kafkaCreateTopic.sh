@@ -1,0 +1,1 @@
+docker exec -it kafkaServer kafka-topics.sh --bootstrap-server kafkaServer:9092 --create --topic youtube 

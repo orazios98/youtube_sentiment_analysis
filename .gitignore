@@ -1,0 +1,6 @@
+.env
+presentation/.ipynb_checkpoints/youtubeSA-checkpoint.ipynb
+
+*.tgz
+
+spark/setup/

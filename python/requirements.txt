@@ -1,0 +1,2 @@
+youtube-data-api
+python-logstash
