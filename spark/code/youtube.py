@@ -33,7 +33,9 @@ es_mapping = {
             {
                 "created_at": {"type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
                 "content": {"type": "text", "fielddata": "true"},
-                "author": {"type": "text", "fielddata": "True"}
+                "author": {"type": "keyword"},
+                "video_title": {"type": "keyword"},
+                "channel": {"type": "keyword"},
             }
     }
 }
@@ -60,7 +62,9 @@ ytComment = tp.StructType([
     tp.StructField(name='created_at',
                    dataType=tp.StringType(),  nullable=True),
     tp.StructField(name='content', dataType=tp.StringType(),  nullable=True),
-    tp.StructField(name='author', dataType=tp.StringType(),  nullable=True)
+    tp.StructField(name='author', dataType=tp.StringType(),  nullable=True),
+    tp.StructField(name='video_title', dataType=tp.StringType(),  nullable=True),
+    tp.StructField(name='channel', dataType=tp.StringType(),  nullable=True)
 ])
 
 # Training Set Schema
@@ -138,7 +142,7 @@ df = df.selectExpr("CAST(value AS STRING)") \
 
 # Apply the machine learning model and select only the interesting columns
 df = pipelineFit.transform(df) \
-    .select("created_at", "content", "author", "prediction")
+    .select("created_at", "content", "author", "prediction", "video_title", "channel")
 
 # Write the stream to elasticsearch
 df.writeStream \
