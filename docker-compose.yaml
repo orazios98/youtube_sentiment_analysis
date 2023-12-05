@@ -12,9 +12,12 @@ services:
             PYTHON_APP: streaming-youtube.py
             LOGSTASH_IP: 10.0.100.30
             LOGSTASH_PORT: 6000
-            VIDEO_URL: ${VIDEO_URL}
+            CHANNEL_URL: ${CHANNEL_URL}
             API_KEY: ${API_KEY}
+            MAX_VIDEO_RESULTS: ${MAX_VIDEO_RESULTS}
             SEND_OLD_COMMENTS: ${SEND_OLD_COMMENTS}
+            WAITING_TIME: ${WAITING_TIME}
+            DATE: ${DATE}
         entrypoint: ["./python-manager.sh"]
         depends_on:
             - elastic_search
