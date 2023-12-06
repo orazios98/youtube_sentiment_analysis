@@ -87,7 +87,7 @@ services:
             tap:
                 ipv4_address: ${IP_LOGSTASH}
         volumes:
-            - $PWD/logstash/pipeline/youtube.conf:/usr/share/logstash/pipeline/logstash.conf
+            - ./logstash/pipeline/youtube.conf:/usr/share/logstash/pipeline/logstash.conf
         ports:
             - ${PORT_LOGSTASH}:${PORT_LOGSTASH}
         depends_on:

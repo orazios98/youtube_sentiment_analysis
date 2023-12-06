@@ -16,6 +16,8 @@ RUN yum -y install glibc
 # RUN apt-get update && apt-get -y install bash python3 python3-pip netcat
 
 RUN pip3 install pyspark numpy elasticsearch
+RUN pip3 install urllib3==1.26.6
+
 # Create Sym Link 
 RUN ln -s /opt/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION} ${SPARK_DIR} 
 
