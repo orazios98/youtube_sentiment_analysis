@@ -17,6 +17,7 @@ RUN yum -y install glibc
 
 RUN pip3 install pyspark numpy elasticsearch
 RUN pip3 install urllib3==1.26.6
+RUN pip3 install feel-it
 
 # Create Sym Link 
 RUN ln -s /opt/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION} ${SPARK_DIR} 

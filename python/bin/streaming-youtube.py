@@ -42,7 +42,7 @@ def send_comment(comment):
     
 def get_comments(video_id):
     try:
-        comments = yt.get_video_comments(video_id, order_by_time=True, max_results=50)
+        comments = yt.get_video_comments(video_id, order_by_time=True, max_results=20)
     except Exception as e:
         print(f"An error occurred: {e}")
         comments = None
@@ -59,7 +59,7 @@ def get_comments(video_id):
         print("first time. Send old comment: ",SEND_OLD_COMMENT)
         if SEND_OLD_COMMENT:
             print("waiting to send old comment")
-            time.sleep(90)
+            time.sleep(120)
             
             print("DATE", DATE)
             # filter comments published after date

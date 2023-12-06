@@ -109,7 +109,7 @@ services:
             xpack.security.enabled: false
             ES_JAVA_OPTS: -Xms4g -Xmx4g
         volumes:
-            - elasticsearch:/usr/share/elasticsearch/data/
+            - elasticsearchIT:/usr/share/elasticsearch/data/
     kibana:
         build:
             context: ./kibana
@@ -148,7 +148,7 @@ services:
     
 volumes:
     sparklibs:
-    elasticsearch:
+    elasticsearchIT:
 
 networks: 
     tap:
